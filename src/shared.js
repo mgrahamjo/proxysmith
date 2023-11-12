@@ -9,12 +9,21 @@ let hasEdited = false;
 const decoder = new TextDecoder();
 
 function updateCode(lines) {
+  const insert = lines.join('\n');
   const view = window.cmView;
+  view.state.selection.ranges.forEach(range => {
+    if (range.from > insert.length) {
+      range.from = insert.length;
+    }
+    if (range.to > insert.length) {
+      range.to = insert.length;
+    }
+  });
   view.dispatch({
     changes: {
       from: 0,
       to: view.state.doc.length,
-      insert: lines.join('\n')
+      insert
     },
     selection: view.state.selection
   });
@@ -41,12 +50,15 @@ function streamUpdates() {
         json += decoder.decode(value);
         try {
           const data = JSON.parse(json);
-          if (data.sync) {
-            sendCode();
-          } else if (data.id !== id && data.mode == mode) {
-            updateCode(data.lines);
+          try {
+            if (data.sync) {
+              sendCode();
+            } else if (data.id !== id && data.mode == mode) {
+              updateCode(data.lines);
+            }
+          } finally {
+            json = '';
           }
-          json = '';
         } catch (e) {
           console.log(e)
         }

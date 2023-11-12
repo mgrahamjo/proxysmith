@@ -23,12 +23,14 @@ function stream(sessionID, res) {
     } else {
       sessions.splice(sessions.indexOf(session), 1);
     }
+    console.log(`Closed stream: ${sessions.length} streams in ${sessionID} / ${Object.keys(sessionCache).length} total sessions.`);
   });
   const sessions = sessionCache[sessionID];
   sessions.push(session);
   if (sessions.length > 1) {
     sessions[0].send('{"sync":1}');
   }
+  console.log(`Opened stream: ${sessions.length} streams in ${sessionID} / ${Object.keys(sessionCache).length} total sessions.`);
 }
 
 function broadcast(sessionID, req, res) {
@@ -161,7 +163,9 @@ const routes = {
 const server = http.createServer((req, res) => {
   const { search, pathname } = new URL(req.url, `http://${req.headers.host}`);
   const sessionID = search.substring(1);
-  sessionCache[sessionID] = sessionCache[sessionID] || [];
+  if (sessionID) {
+    sessionCache[sessionID] = sessionCache[sessionID] || [];
+  }
   if (routes[pathname]) {
     return routes[pathname](res, sessionID, req);
   }
