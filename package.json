@@ -1,0 +1,14 @@
+{
+  "name": "ProxySmith",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "mgrahamjo",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "pg-mem": "^2.7.1"
+  }
+}

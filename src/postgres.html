@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Code Collab - javascript</title>
+    <link rel="stylesheet" href="/src/shared.css"/>
+  </head>
+  <body>
+  <div id="buttons">
+    <a id="run" onclick="runPG()">RUN</a>
+    <a class="mode" onClick="location.pathname = '/javascript'">JS</a>
+    <a class="mode" onClick="location.pathname = '/node'">NODE</a>
+    <a class="mode" onClick="location.pathname = '/python'">PYTHON</a>
+    <a class="mode active" onClick="location.pathname = '/postgres'">POSTGRES</a>
+  </div>
+  <div id="code-editor"></div>
+  <div class="terminal"></div>
+  <script>
+    const $terminal = document.querySelector('.terminal');
+    function formatTable(rows) {
+      const columnWidths = new Array(Object.keys(rows[0]).length).fill(0);
+      Object.keys(rows[0]).forEach((key, i) => {
+        columnWidths[i] = Math.max(columnWidths[i], key.length + 2);
+      });
+      rows.forEach(row => {
+        Object.values(row).forEach((val, i) => {
+          columnWidths[i] = Math.max(columnWidths[i], val.toString().length + 2);
+        });
+      });
+      const headers = Object.keys(rows[0]).map((key, i) => {
+        const leftPadding = new Array(columnWidths[i] - key.length - 1).fill(' ').join('');
+        return leftPadding + key + ' ';
+      });
+      const border = headers.map(col => new Array(col.length).fill('-').join('')).join('+');
+      let output = headers.join('|') + '\n' + border + '\n';
+      rows.forEach(row => {
+        const rowString = Object.values(row).map((val, i) => {
+          val = val.toString();
+          const leftPadding = new Array(columnWidths[i] - val.length - 1).fill(' ').join('');
+          return leftPadding + val + ' ';
+        }).join('|');
+        output += rowString + '\n';
+      });
+      return output;
+    }
+    async function runPG() {
+      const result = await fetch(`/pg-query${location.search}`, {
+        method: 'POST',
+        body: window.cmView.state.doc.toString()
+      }).then(res => res.json());
+      if (result.error) {
+        $terminal.innerHTML = `<div class="error">${result.error}</div>`;
+      } else {
+        $terminal.innerHTML = `<div>${formatTable(result.data)}</div>`;
+      }
+    }
+  </script>
+  <script type="importmap">
+    {
+      "imports": {
+        "codemirror/": "https://deno.land/x/codemirror_esm@v6.0.1/esm/"
+      }
+    }
+  </script>
+  <script src="/src/shared.js"></script>
+  <script async type="module">
+    import { basicSetup, EditorView } from "codemirror/codemirror/dist/index.js"
+    import { sql } from "codemirror/lang-sql/dist/index.js"
+    const editor = new EditorView({
+      extensions: [basicSetup, sql()],
+      parent: document.getElementById('code-editor')
+    });
+    window.cmView = editor.docView.view;
+    window.init();
+  </script>
+  </body>
+</html>

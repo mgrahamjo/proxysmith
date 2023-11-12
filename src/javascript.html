@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Code Collab - javascript</title>
+    <link rel="stylesheet" href="/src/shared.css"/>
+  </head>
+  <body>
+  <div id="buttons">
+    <a id="run" onclick="runJS()">RUN</a>
+    <a class="mode active" onClick="location.pathname = '/javascript'">JS</a>
+    <a class="mode" onClick="location.pathname = '/node'">NODE</a>
+    <a class="mode" onClick="location.pathname = '/python'">PYTHON</a>
+    <a class="mode" onClick="location.pathname = '/postgres'">POSTGRES</a>
+  </div>
+  <div id="code-editor"></div>
+  <div class="terminal"></div>
+  <script>
+    const $terminal = document.querySelector('.terminal');
+    function runJS() {
+      const script = window.cmView.state.doc.toString();
+      const run = new Function(`
+      const stdout = [];
+      const stderr = [];
+      function log(...args) {
+        stdout.push(...args);
+      }
+      with ({
+        console: {
+          ...console,
+          log,
+          info: log,
+          debug: log,
+          warn: log,
+          error: (...args) => {
+            stderr.push(...args);
+          }
+        }
+      }) {
+        try {
+          stdout.push(eval(\`${script.replace(/`/g, '\\`')}\`));
+        } catch (e) {
+          stderr.push(e.toString());
+        }
+      }
+      return { stdout, stderr };`);
+      let results;
+      try {
+        results = run();
+      } catch (error) {
+        results = { stderr: [error.toString()] };
+      }
+      $terminal.innerHTML = '';
+      results.stdout.forEach(line => {
+        $terminal.innerHTML += `<div>${line === undefined ? 'undefined' : line.toString()}</div>`;
+      });
+      results.stderr.forEach(line => {
+        $terminal.innerHTML += `<div class="error">${line}</div>`;
+      });
+    }
+  </script>
+  <script type="importmap">
+    {
+      "imports": {
+        "codemirror/": "https://deno.land/x/codemirror_esm@v6.0.1/esm/"
+      }
+    }
+  </script>
+  <script src="/src/shared.js"></script>
+  <script async type="module">
+    import { basicSetup, EditorView } from "codemirror/codemirror/dist/index.js"
+    import { javascript } from "codemirror/lang-javascript/dist/index.js"
+    const editor = new EditorView({
+      extensions: [basicSetup, javascript()],
+      parent: document.getElementById('code-editor')
+    });
+    window.cmView = editor.docView.view;
+    window.init();
+  </script>
+  </body>
+</html>

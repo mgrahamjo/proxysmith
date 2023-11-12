@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Code Collab - python</title>
+    <link rel="stylesheet" href="https://pyscript.net/releases/2022.12.1/pyscript.css" />
+    <script defer src="https://pyscript.net/releases/2022.12.1/pyscript.js"></script>
+    <link rel="stylesheet" href="/src/shared.css"/>
+  </head>
+  <body>
+  <style type="text/css">
+    .py-terminal {
+      margin: 0 !important;
+      background-color: #313131 !important;
+      overflow-y: auto;
+      max-height: calc(50vh - 74px);
+    }
+    #runButton {
+      visibility: hidden !important;
+    }
+    .py-error {
+      margin: 10px;
+      padding: 5px 10px;
+    }
+  </style>
+  <div id="buttons">
+    <a id="run" onclick="runPython()">RUN</a>
+    <a class="mode" onClick="location.pathname = '/javascript'">JS</a>
+    <a class="mode" onClick="location.pathname = '/node'">NODE</a>
+    <a class="mode active" onClick="location.pathname = '/python'">PYTHON</a>
+    <a class="mode" onClick="location.pathname = '/postgres'">POSTGRES</a>
+  </div>
+  <py-repl></py-repl>
+  <script src="/src/shared.js"></script>
+  <script>
+    let $terminal;
+    function runPython() {
+      $terminal = $terminal || document.querySelector('.py-terminal');
+      $terminal.innerText = '';
+      document.getElementById('runButton').click();
+    }
+    function setup() {
+      window.cmView = document.querySelector('[contenteditable]').cmView.view;
+      window.init();
+    }
+  </script>
+  <py-script>
+    import js
+    js.setup()
+  </py-script>
+  </body>
+</html>
