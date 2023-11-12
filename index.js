@@ -124,12 +124,15 @@ function nodeQuery(res, sessionID, req) {
       }
     });
     try {
-      stdout.push(vm.runInNewContext(code, context, {
+      const ret = vm.runInNewContext(code, context, {
         contextCodeGeneration: {
           strings: false,
           wasm: false
         }
-      }));
+      });
+      if (ret !== undefined) {
+        stdout.push(ret);
+      }
     } catch (error) {
       stderr.push(error.toString());
     }

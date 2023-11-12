@@ -40,7 +40,10 @@
         }
       }) {
         try {
-          stdout.push(eval(\`${script.replace(/`/g, '\\`')}\`));
+          const ret = eval(\`${script.replace(/`/g, '\\`')}\`);
+          if (ret !== undefined) {
+            stdout.push(ret);
+          }
         } catch (e) {
           stderr.push(e.toString());
         }
