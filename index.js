@@ -51,7 +51,10 @@ const contentTypes = {
 };
 
 function serveStatic(pathname, res) {
-  res.setHeader('Content-Type', contentTypes[path.extname(pathname)]);
+  const contentType = contentTypes[path.extname(pathname)];
+  if (contentType) {
+    res.setHeader('Content-Type', contentType);
+  }
   if (fileCache[pathname]) {
     return res.end(fileCache[pathname]);
   }
