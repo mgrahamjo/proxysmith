@@ -88,24 +88,30 @@
       parent: document.getElementById('code-editor')
     });
     window.cmView = editor.docView.view;
-    window.init();
-    const content = `console.log(\`
+    const content = `const HELP = 
 
-  ProxySmith is a browser-based collaborative code editor.
+\`ProxySmith is a collaborative code
+editor. It provides an easy way for
+multiple people to view, edit, and
+run the same code at the same time.
 
-  It provides an easy way for multiple people to view, edit,
-  and run the same code at the same time. To collaborate,
-  just share your current URL with someone. They will see 
-  your code edits, and you will see theirs.
+To collaborate, just share your
+current URL with someone. They will
+see your code edits, and you will
+see theirs.
 
-  To execute your code, just click the green "RUN" button.
+To execute your code, just click
+the green "RUN" button.
 
-  To resize the code editor, use the draggable handle in
-  the gray column on the left side of the editor view.
+To resize the code editor, use the
+draggable handle in the gray column
+on the left side of the editor view.
 
-  ProxySmith supports JavaScript, Python, and Postgresql.
+ProxySmith supports JavaScript,
+Python, and Postgresql.\`;
 
-\`);`;
+console.log(HELP);
+`;
     window.cmView.dispatch({
       changes: {
         from: 0,
@@ -113,6 +119,8 @@
         insert: content
       }
     });
+    window.sendCode = window.updateCode = () => {};
+    window.init();
   </script>
   </body>
 </html>
