@@ -2,14 +2,12 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const { newDb } = require('pg-mem');
-const vm = require('vm');
-const m = require('module');
 
 const fileCache = {
   python: fs.readFileSync('src/python.html'),
   javascript: fs.readFileSync('src/javascript.html'),
-  node: fs.readFileSync('src/node.html'),
-  postgres: fs.readFileSync('src/postgres.html')
+  postgres: fs.readFileSync('src/postgres.html'),
+  help: fs.readFileSync('src/help.html')
 };
 
 const sessionCache = {};
@@ -64,6 +62,7 @@ function serveStatic(pathname, res) {
     if (err) {
       res.statusCode = 500;
       res.statusMessage = err.toString();
+      res.end();
     } else {
       fileCache[pathname] = data;
       res.end(fileCache[pathname]);
@@ -96,55 +95,6 @@ function pgQuery(res, sessionID, req) {
   });
 }
 
-function nodeQuery(res, sessionID, req) {
-  let code = '';
-  req.on('data', chunk => {
-    code += chunk.toString();
-  }).on('end', () => {
-    const stdout = [];
-    const stderr = [];
-    function log(...args) {
-      stdout.push(...args);
-    }
-    const context = vm.createContext({
-      exports: {},
-      require,
-      module,
-      __filename: 'index.js',
-      __dirname: '/',
-      console: {
-        ...console,
-        log,
-        info: log,
-        debug: log,
-        warn: log,
-        error: (...args) => {
-          stderr.push(...args);
-        }
-      }
-    });
-    try {
-      const ret = vm.runInNewContext(code, context, {
-        contextCodeGeneration: {
-          strings: false,
-          wasm: false
-        }
-      });
-      if (ret !== undefined) {
-        stdout.push(ret);
-      }
-    } catch (error) {
-      stderr.push(error.toString());
-    }
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify({ stdout, stderr }));
-  }).on('error', error => {
-    res.statusCode = 500;
-    res.statusMessage = error.toString();
-    res.end();
-  });
-}
-
 function redirect(res, sessionID) {
   res.setHeader('Location', `/javascript?${sessionID}`);
   res.statusCode = 301;
@@ -154,11 +104,9 @@ function redirect(res, sessionID) {
 const routes = {
   '/': redirect,
   '/javascript': res => res.end(fileCache.javascript),
-  '/node': res => res.end(fileCache.node),
   '/python': res => res.end(fileCache.python),
   '/postgres': res => res.end(fileCache.postgres),
   '/pg-query': pgQuery,
-  '/node-query': nodeQuery,
   '/send': (res, sessionID, req) => broadcast(sessionID, req, res),
   '/stream': (res, sessionID) => stream(sessionID, res)
 };

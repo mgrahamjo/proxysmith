@@ -9,17 +9,25 @@
   </head>
   <body>
   <div id="buttons">
-    <a id="run" onclick="runJS()">RUN</a>
-    <a class="mode active" onClick="location.pathname = '/javascript'">JS</a>
-    <a class="mode" onClick="location.pathname = '/node'">NODE</a>
-    <a class="mode" onClick="location.pathname = '/python'">PYTHON</a>
-    <a class="mode" onClick="location.pathname = '/postgres'">POSTGRES</a>
+    <a id="run" onclick="_run()">RUN</a>
+    <input type="checkbox" class="menu-toggle">
+    <div class="nav">
+      <a class="mode active" onClick="location.pathname = '/javascript'">JS</a>
+      <a class="mode" onClick="location.pathname = '/python'">PYTHON</a>
+      <a class="mode" onClick="location.pathname = '/postgres'">POSTGRES</a>
+      <a class="mode" onClick="location.pathname = '/help'">HELP</a>
+    </div>
+    <div class="menu">
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+    </div>
   </div>
   <div id="code-editor"></div>
   <div class="terminal"></div>
   <script>
     const $terminal = document.querySelector('.terminal');
-    function runJS() {
+    function _run() {
       const script = window.cmView.state.doc.toString();
       const run = new Function(`
       const stdout = [];

@@ -8,13 +8,21 @@
     <link rel="stylesheet" href="/src/shared.css"/>
   </head>
   <body>
-  <div id="buttons">
-    <a id="run" onclick="runPG()">RUN</a>
-    <a class="mode" onClick="location.pathname = '/javascript'">JS</a>
-    <a class="mode" onClick="location.pathname = '/node'">NODE</a>
-    <a class="mode" onClick="location.pathname = '/python'">PYTHON</a>
-    <a class="mode active" onClick="location.pathname = '/postgres'">POSTGRES</a>
-  </div>
+    <div id="buttons">
+      <a id="run" onclick="_run()">RUN</a>
+      <input type="checkbox" class="menu-toggle">
+      <div class="nav">
+        <a class="mode" onClick="location.pathname = '/javascript'">JS</a>
+        <a class="mode" onClick="location.pathname = '/python'">PYTHON</a>
+        <a class="mode active" onClick="location.pathname = '/postgres'">POSTGRES</a>
+        <a class="mode" onClick="location.pathname = '/help'">HELP</a>
+      </div>
+      <div class="menu">
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+      </div>
+    </div>
   <div id="code-editor"></div>
   <div class="terminal"></div>
   <script>
@@ -45,7 +53,7 @@
       });
       return output;
     }
-    async function runPG() {
+    async function _run() {
       const result = await fetch(`/pg-query${location.search}`, {
         method: 'POST',
         body: window.cmView.state.doc.toString()

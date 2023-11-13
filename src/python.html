@@ -10,6 +10,21 @@
     <link rel="stylesheet" href="/src/shared.css"/>
   </head>
   <body>
+  <div id="buttons">
+    <a id="run" onclick="_run()">RUN</a>
+    <input type="checkbox" class="menu-toggle">
+    <div class="nav">
+      <a class="mode" onClick="location.pathname = '/javascript'">JS</a>
+      <a class="mode active" onClick="location.pathname = '/python'">PYTHON</a>
+      <a class="mode" onClick="location.pathname = '/postgres'">POSTGRES</a>
+      <a class="mode" onClick="location.pathname = '/help'">HELP</a>
+    </div>
+    <div class="menu">
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+    </div>
+  </div>
   <style type="text/css">
     .py-terminal {
       margin: 0 !important;
@@ -25,18 +40,11 @@
       padding: 5px 10px;
     }
   </style>
-  <div id="buttons">
-    <a id="run" onclick="runPython()">RUN</a>
-    <a class="mode" onClick="location.pathname = '/javascript'">JS</a>
-    <a class="mode" onClick="location.pathname = '/node'">NODE</a>
-    <a class="mode active" onClick="location.pathname = '/python'">PYTHON</a>
-    <a class="mode" onClick="location.pathname = '/postgres'">POSTGRES</a>
-  </div>
   <py-repl></py-repl>
   <script src="/src/shared.js"></script>
   <script>
     let $terminal;
-    function runPython() {
+    function _run() {
       $terminal = $terminal || document.querySelector('.py-terminal');
       $terminal.innerText = '';
       document.getElementById('runButton').click();
