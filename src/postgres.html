@@ -28,6 +28,9 @@
   <script>
     const $terminal = document.querySelector('.terminal');
     function formatTable(rows) {
+      if (!rows.length) {
+        return '';
+      }
       const columnWidths = new Array(Object.keys(rows[0]).length).fill(0);
       Object.keys(rows[0]).forEach((key, i) => {
         columnWidths[i] = Math.max(columnWidths[i], key.length + 2);
@@ -75,9 +78,16 @@
   <script src="/src/shared.js"></script>
   <script async type="module">
     import { basicSetup, EditorView } from "codemirror/codemirror/dist/index.js"
+    import { keymap } from "codemirror/view/dist/index.js"
+    import { indentWithTab } from "codemirror/commands/dist/index.js"
     import { sql } from "codemirror/lang-sql/dist/index.js"
+    import { oneDark } from 'codemirror/theme-one-dark/dist/index.js';
+    const extensions = [basicSetup, keymap.of([indentWithTab]), sql(), oneDark];
+    if (localStorage.getItem('wrap')) {
+      extensions.push(EditorView.lineWrapping);
+    }
     const editor = new EditorView({
-      extensions: [basicSetup, sql()],
+      extensions,
       parent: document.getElementById('code-editor')
     });
     window.cmView = editor.docView.view;

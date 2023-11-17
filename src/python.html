@@ -10,6 +10,21 @@
     <link rel="stylesheet" href="/src/shared.css"/>
   </head>
   <body>
+  <style type="text/css">
+    .py-terminal {
+      margin: 0 !important;
+      background-color: #313131 !important;
+      overflow-y: auto;
+      max-height: calc(50vh - 74px);
+    }
+    .py-error {
+      margin: 10px;
+      padding: 5px 10px;
+    }
+    #pyscript_loading_splash {
+      display: none !important;
+    }
+  </style>
   <div id="buttons">
     <a id="run" onclick="_run()">RUN</a>
     <input type="checkbox" class="menu-toggle">
@@ -25,38 +40,42 @@
       <div class="bar"></div>
     </div>
   </div>
-  <style type="text/css">
-    .py-terminal {
-      margin: 0 !important;
-      background-color: #313131 !important;
-      overflow-y: auto;
-      max-height: calc(50vh - 74px);
-    }
-    #runButton {
-      visibility: hidden !important;
-    }
-    .py-error {
-      margin: 10px;
-      padding: 5px 10px;
-    }
-  </style>
-  <py-repl></py-repl>
-  <script src="/src/shared.js"></script>
-  <script>
-    let $terminal;
-    function _run() {
-      $terminal = $terminal || document.querySelector('.py-terminal');
-      $terminal.innerText = '';
-      document.getElementById('runButton').click();
-    }
-    function setup() {
-      window.cmView = document.querySelector('[contenteditable]').cmView.view;
-      window.init();
+  <div id="code-editor"></div>
+  <div class="terminal"></div>
+  <script type="importmap">
+    {
+      "imports": {
+        "codemirror/": "https://deno.land/x/codemirror_esm@v6.0.1/esm/"
+      }
     }
   </script>
-  <py-script>
-    import js
-    js.setup()
-  </py-script>
+  <script src="/src/shared.js"></script>
+  <script async type="module">
+    import { basicSetup, EditorView } from "codemirror/codemirror/dist/index.js"
+    import { keymap } from "codemirror/view/dist/index.js"
+    import { indentWithTab } from "codemirror/commands/dist/index.js"
+    import { python } from "codemirror/lang-python/dist/index.js"
+    import { oneDark } from 'codemirror/theme-one-dark/dist/index.js';
+    const $terminal = document.querySelector('.terminal');
+    window._run = () => {
+      const script = window.cmView.state.doc.toString();
+      $terminal.innerHTML = '';
+      try {
+        pyscript.runtime.interpreter.runPython(script);
+      } catch (error) {
+        $terminal.innerHTML = `<div class="error">${error}</div>`
+      }
+    };
+    const extensions = [basicSetup, keymap.of([indentWithTab]), python(), oneDark];
+    if (localStorage.getItem('wrap')) {
+      extensions.push(EditorView.lineWrapping);
+    }
+    const editor = new EditorView({
+      extensions,
+      parent: document.getElementById('code-editor')
+    });
+    window.cmView = editor.docView.view;
+    window.init();
+  </script>
   </body>
 </html>

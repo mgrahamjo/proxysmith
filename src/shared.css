@@ -1,25 +1,24 @@
 body {
   margin: 0;
-  background-color: #313131;
+  background-color: #161a21;
   font-family: monospace, sans-serif;
   font-size: 14px;
 }
-.cm-scroller {
-  background-color: white;
+#code-editor {
+  max-height: calc(75vh - 56px);
+  overflow: auto;
 }
-#code-editor .cm-gutters {
-  height: calc(50vh - 10px);
-  resize: vertical;
-  overflow-y: auto;
+#code-editor .cm-scroller {
+  min-height: 50vh;
 }
 a {
   color: white;
   padding: 10px 20px;
   border-radius: 2px;
   cursor: pointer;
-  background-color: #464646;
+  background-color: #282c34;
   border: none;
-  border: 1px solid #5b5b5b;
+  border: 1px solid #41454c;
   text-shadow: 1px 1px 0px #0c4110;
   transition: background-color 0.2s;
   margin-right: 10px;
@@ -40,26 +39,28 @@ a:active {
 #buttons {
   display: flex;
   padding: 10px 0 10px 10px;
+  background-color: #161a21;
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 .active.mode {
   pointer-events: none;
   background: #efefef;
-  color: #313131;
+  color: #161a21;
   text-shadow: none;
   border: 1px solid white;
 }
 .terminal {
   color: white;
-  padding: 0 10px 10px 10px;
+  padding: 10px;
   font-family: monospace;
   white-space: pre;
   line-height: 1.5em;
+  box-sizing: border-box;
 }
 .terminal .error {
   color: #fe6262;
-}
-.terminal div {
-  margin-top: 10px;
 }
 #code-editor::before {
   content: 'LOADING...';
