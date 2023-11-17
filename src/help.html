@@ -27,49 +27,33 @@
   <div class="terminal"></div>
   <script>
     const $terminal = document.querySelector('.terminal');
-    function _run() {
+    const AsyncFunction = async function () {}.constructor;
+    async function _run() {
       const script = window.cmView.state.doc.toString();
-      const run = new Function(`
       const stdout = [];
       const stderr = [];
       function log(...args) {
-        stdout.push(...args);
+        console.log(...args);
+        $terminal.innerHTML += `<div>${args.join(' ')}</div>`;
       }
-      with ({
-        console: {
+      function logErr(...args) {
+        console.error(...args);
+        $terminal.innerHTML += `<div class="error">${args.join(' ')}</div>`;
+      }
+      $terminal.innerHTML = '';
+      try {
+        const run = new AsyncFunction('console', script);
+        const result = await run({
           ...console,
           log,
           info: log,
           debug: log,
           warn: log,
-          error: (...args) => {
-            stderr.push(...args);
-          }
-        }
-      }) {
-        try {
-          const ret = eval(\`${script.replace(/`/g, '\\`')}\`);
-          if (ret !== undefined) {
-            stdout.push(ret);
-          }
-        } catch (e) {
-          stderr.push(e.toString());
-        }
-      }
-      return { stdout, stderr };`);
-      let results;
-      try {
-        results = run();
+          error: logErr
+        });
       } catch (error) {
-        results = { stderr: [error.toString()] };
+        logErr(error);
       }
-      $terminal.innerHTML = '';
-      results.stdout.forEach(line => {
-        $terminal.innerHTML += `<div>${line === undefined ? 'undefined' : line.toString()}</div>`;
-      });
-      results.stderr.forEach(line => {
-        $terminal.innerHTML += `<div class="error">${line}</div>`;
-      });
     }
   </script>
   <script type="importmap">
@@ -82,9 +66,16 @@
   <script src="/src/shared.js"></script>
   <script async type="module">
     import { basicSetup, EditorView } from "codemirror/codemirror/dist/index.js"
+    import { keymap } from "codemirror/view/dist/index.js"
+    import { indentWithTab } from "codemirror/commands/dist/index.js"
     import { javascript } from "codemirror/lang-javascript/dist/index.js"
+    import { oneDark } from 'codemirror/theme-one-dark/dist/index.js';
+    const extensions = [basicSetup, keymap.of([indentWithTab]), javascript(), oneDark];
+    if (localStorage.getItem('wrap')) {
+      extensions.push(EditorView.lineWrapping);
+    }
     const editor = new EditorView({
-      extensions: [basicSetup, javascript()],
+      extensions,
       parent: document.getElementById('code-editor')
     });
     window.cmView = editor.docView.view;

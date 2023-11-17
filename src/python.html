@@ -21,6 +21,9 @@
     #pyscript_loading_splash {
       display: none !important;
     }
+    #package-output {
+      color: rgb(59, 61, 83);
+    }
   </style>
   <div id="buttons">
     <a id="run" onclick="_run()">RUN</a>
@@ -42,6 +45,7 @@
   <div id="modal">
     <p>INSTALLING PACKAGES...</p>
     <div id="packages"></div>
+    <div id="package-output"></div>
   </div>
   <script defer src="https://pyscript.net/releases/2022.12.1/pyscript.js"></script>
   <script type="importmap">
@@ -61,11 +65,13 @@
     const $terminal = document.querySelector('.terminal');
     const $modal = document.getElementById('modal');
     const $packages = document.getElementById('packages');
+    const $packageOutput = document.getElementById('package-output');
     function installLog(msg) {
-      $packages.innerHTML += `<p>${msg}</p>`
+      $packageOutput.innerHTML += `<p>${msg}</p>`
     }
     window._run = async () => {
       $terminal.innerHTML = '';
+      $packageOutput.innerHTML = '';
       document.querySelector('.py-terminal').innerHTML = '';
       const script = window.cmView.state.doc.toString();
       const packages = pyscript.runtime.interpreter.pyodide_py.code.find_imports(script).toJs();
