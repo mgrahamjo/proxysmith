@@ -1,4 +1,4 @@
-const id = btoa(Math.random()).replace(/[^A-Z0-9]+/gi, '');
+const id = location.search?.slice(1) || btoa(Math.random()).replace(/[^A-Z0-9]+/gi, '');
 const mode = location.pathname.split('/')[1];
 
 if (!location.search) {
@@ -53,8 +53,11 @@ function streamUpdates() {
           try {
             if (data.sync) {
               sendCode();
-            } else if (data.id !== id && data.mode == mode) {
-              updateCode(data.lines);
+            } else if (data.mode == mode) {
+              if (data.id !== id) {
+                updateCode(data.lines);
+              }
+              localStorage.setItem(mode + id, JSON.stringify(data.lines));
             }
           } finally {
             json = '';
@@ -81,4 +84,8 @@ window.init = () => {
     }
   }, 1000);
   streamUpdates();
+  const cachedDoc = localStorage.getItem(mode + id);
+  if (cachedDoc) {
+    updateCode(JSON.parse(cachedDoc));
+  }
 };
