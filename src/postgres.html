@@ -82,10 +82,10 @@
     import { indentWithTab } from "codemirror/commands/dist/index.js"
     import { sql } from "codemirror/lang-sql/dist/index.js"
     import { oneDark } from 'codemirror/theme-one-dark/dist/index.js';
-    const extensions = [basicSetup, keymap.of([indentWithTab]), sql(), oneDark];
-    if (localStorage.getItem('wrap')) {
-      extensions.push(EditorView.lineWrapping);
-    }
+    const extensions = [basicSetup, keymap.of([indentWithTab]), sql(), oneDark, EditorView.lineWrapping];
+    // if (localStorage.getItem('wrap')) {
+    //   extensions.push(EditorView.lineWrapping);
+    // }
     const editor = new EditorView({
       extensions,
       parent: document.getElementById('code-editor')

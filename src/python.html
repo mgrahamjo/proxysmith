@@ -90,10 +90,10 @@
         $terminal.innerHTML = `<div class="error">${error}</div>`
       }
     };
-    const extensions = [basicSetup, keymap.of([indentWithTab]), python(), oneDark];
-    if (localStorage.getItem('wrap')) {
-      extensions.push(EditorView.lineWrapping);
-    }
+    const extensions = [basicSetup, keymap.of([indentWithTab]), python(), oneDark, EditorView.lineWrapping];
+    // if (localStorage.getItem('wrap')) {
+    //   extensions.push(EditorView.lineWrapping);
+    // }
     const editor = new EditorView({
       extensions,
       parent: document.getElementById('code-editor')
