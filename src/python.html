@@ -14,15 +14,14 @@
       margin: 0 !important;
       background: none;
     }
-    .py-error {
-      margin: 10px;
-      padding: 5px 10px;
-    }
     #pyscript_loading_splash {
       display: none !important;
     }
     #package-output {
       color: rgb(59, 61, 83);
+    }
+    .py-terminal-hidden {
+      display: block !important;
     }
   </style>
   <div id="buttons">
@@ -41,7 +40,6 @@
     </div>
   </div>
   <div id="code-editor"></div>
-  <div class="terminal"></div>
   <div id="modal">
     <p>INSTALLING PACKAGES...</p>
     <div id="packages"></div>
@@ -62,7 +60,7 @@
     import { indentWithTab } from "codemirror/commands/dist/index.js"
     import { python } from "codemirror/lang-python/dist/index.js"
     import { oneDark } from 'codemirror/theme-one-dark/dist/index.js';
-    const $terminal = document.querySelector('.terminal');
+    let $terminal;
     const $modal = document.getElementById('modal');
     const $packages = document.getElementById('packages');
     const $packageOutput = document.getElementById('package-output');
@@ -70,9 +68,9 @@
       $packageOutput.innerHTML += `<p>${msg}</p>`
     }
     window._run = async () => {
-      $terminal.innerHTML = '';
       $packageOutput.innerHTML = '';
-      document.querySelector('.py-terminal').innerHTML = '';
+      $terminal = $terminal || document.querySelector('.py-terminal');
+      $terminal.innerHTML = '';
       const script = window.cmView.state.doc.toString();
       const packages = pyscript.runtime.interpreter.pyodide_py.code.find_imports(script).toJs();
       if (packages?.length) {

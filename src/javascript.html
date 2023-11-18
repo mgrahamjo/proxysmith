@@ -25,32 +25,39 @@
   </div>
   <div id="code-editor"></div>
   <div class="terminal"></div>
+  <iframe srcdoc="<!doctype html><meta charset=utf-8><title></title>" style="display:none;"></iframe>
   <script>
+    const iframeWindow = document.querySelector('iframe[srcdoc]').contentWindow;
+    const log = (...args) => {
+      console.log(...args);
+      const div = document.createElement('div');
+      div.textContent = args.join(' ');
+      $terminal.appendChild(div);
+    };
+    const logErr = (...args) => {
+      console.error(...args);
+      const div = document.createElement('div');
+      div.textContent = args.join(' ');
+      div.classList.add('error');
+      $terminal.appendChild(div);
+    };
+    iframeWindow.console = {
+      ...console,
+      log,
+      info: log,
+      debug: log,
+      warn: log,
+      error: logErr
+    };
+    iframeWindow.parent = iframeWindow;
     const $terminal = document.querySelector('.terminal');
     const AsyncFunction = async function () {}.constructor;
     async function _run() {
       const script = window.cmView.state.doc.toString();
-      const stdout = [];
-      const stderr = [];
-      function log(...args) {
-        console.log(...args);
-        $terminal.innerHTML += `<div>${args.join(' ')}</div>`;
-      }
-      function logErr(...args) {
-        console.error(...args);
-        $terminal.innerHTML += `<div class="error">${args.join(' ')}</div>`;
-      }
       $terminal.innerHTML = '';
       try {
-        const run = new AsyncFunction('console', script);
-        const result = await run({
-          ...console,
-          log,
-          info: log,
-          debug: log,
-          warn: log,
-          error: logErr
-        });
+        const run = new AsyncFunction(...Object.keys(iframeWindow), script).bind(iframeWindow);
+        const result = await run(...Object.values(iframeWindow));
       } catch (error) {
         logErr(error);
       }

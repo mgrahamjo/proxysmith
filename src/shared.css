@@ -59,7 +59,7 @@ a:active {
   line-height: 1.5em;
   box-sizing: border-box;
 }
-.terminal .error {
+.error {
   color: #fe6262;
 }
 #code-editor::before {

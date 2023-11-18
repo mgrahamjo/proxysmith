@@ -1,8 +1,9 @@
-const id = location.search?.slice(1) || btoa(Math.random()).replace(/[^A-Z0-9]+/gi, '');
+const sessionID = btoa(Math.random()).replace(/[^A-Z0-9]+/gi, '');
+const docID = location.search?.slice(1) || sessionID;
 const mode = location.pathname.split('/')[1];
 
 if (!location.search) {
-  location.search = '?' + id;
+  location.search = '?' + docID;
 }
 
 let hasEdited = false;
@@ -33,7 +34,8 @@ function sendCode() {
   fetch(`/send${location.search}`, {
     method: 'POST',
     body: JSON.stringify({
-      id,
+      sessionID,
+      docID,
       lines: window.cmView.state.doc,
       mode
     })
@@ -54,10 +56,10 @@ function streamUpdates() {
             if (data.sync) {
               sendCode();
             } else if (data.mode == mode) {
-              if (data.id !== id) {
+              if (data.sessionID !== sessionID) {
                 updateCode(data.lines);
               }
-              localStorage.setItem(mode + id, JSON.stringify(data.lines));
+              localStorage.setItem(mode + docID, JSON.stringify(data.lines));
             }
           } finally {
             json = '';
@@ -67,7 +69,7 @@ function streamUpdates() {
         }
       }
     }
-  }).then(streamUpdates);
+  }).finally(streamUpdates);
 }
 
 window.init = () => {
@@ -84,7 +86,7 @@ window.init = () => {
     }
   }, 1000);
   streamUpdates();
-  const cachedDoc = localStorage.getItem(mode + id);
+  const cachedDoc = localStorage.getItem(mode + docID);
   if (cachedDoc) {
     updateCode(JSON.parse(cachedDoc));
   }

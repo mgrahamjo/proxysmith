@@ -12,32 +12,32 @@ const fileCache = {
 
 const sessionCache = {};
 
-function stream(sessionID, res) {
+function stream(docID, res) {
   const session = { send: data => res.write(data) };
   res.on('close', () => {
-    const sessions = sessionCache[sessionID];
+    const sessions = sessionCache[docID];
     if (sessions.length === 1) {
-      delete sessionCache[sessionID];
+      delete sessionCache[docID];
     } else {
       sessions.splice(sessions.indexOf(session), 1);
     }
-    console.log(`Closed stream: ${sessions.length} streams in ${sessionID} / ${Object.keys(sessionCache).length} total sessions.`);
+    console.log(`Closed stream: ${sessions.length} streams in ${docID} / ${Object.keys(sessionCache).length} total sessions.`);
   });
-  const sessions = sessionCache[sessionID];
+  const sessions = sessionCache[docID];
   sessions.push(session);
   if (sessions.length > 1) {
     sessions[0].send('{"sync":1}');
   }
-  console.log(`Opened stream: ${sessions.length} streams in ${sessionID} / ${Object.keys(sessionCache).length} total sessions.`);
+  console.log(`Opened stream: ${sessions.length} streams in ${docID} / ${Object.keys(sessionCache).length} total sessions.`);
 }
 
-function broadcast(sessionID, req, res) {
+function broadcast(docID, req, res) {
   let data = '';
   req.on('data', chunk => {
     data += chunk.toString();
   }).on('end', () => {
     if (data) {
-      sessionCache[sessionID].forEach(session => session.send(data));
+      sessionCache[docID].forEach(session => session.send(data));
     }
     res.end();
   });
@@ -70,7 +70,7 @@ function serveStatic(pathname, res) {
   });
 }
 
-function pgQuery(res, sessionID, req) {
+function pgQuery(res, docID, req) {
   let query = '';
   req.on('data', chunk => {
     query += chunk.toString();
@@ -95,8 +95,8 @@ function pgQuery(res, sessionID, req) {
   });
 }
 
-function redirect(res, sessionID) {
-  res.setHeader('Location', `/javascript?${sessionID}`);
+function redirect(res, docID) {
+  res.setHeader('Location', `/javascript?${docID}`);
   res.statusCode = 301;
   res.end();
 }
@@ -107,18 +107,18 @@ const routes = {
   '/python': res => res.end(fileCache.python),
   '/postgres': res => res.end(fileCache.postgres),
   '/pg-query': pgQuery,
-  '/send': (res, sessionID, req) => broadcast(sessionID, req, res),
-  '/stream': (res, sessionID) => stream(sessionID, res)
+  '/send': (res, docID, req) => broadcast(docID, req, res),
+  '/stream': (res, docID) => stream(docID, res)
 };
 
 const server = http.createServer((req, res) => {
   const { search, pathname } = new URL(req.url, `http://${req.headers.host}`);
-  const sessionID = search.substring(1);
-  if (sessionID) {
-    sessionCache[sessionID] = sessionCache[sessionID] || [];
+  const docID = search.substring(1);
+  if (docID) {
+    sessionCache[docID] = sessionCache[docID] || [];
   }
   if (routes[pathname]) {
-    return routes[pathname](res, sessionID, req);
+    return routes[pathname](res, docID, req);
   }
   serveStatic(path.join('.', pathname), res);
 });
