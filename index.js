@@ -11,7 +11,7 @@ const fileCache = {
 
 const sessionCache = {};
 
-function stream(docID, res) {
+function stream(docID, res, mode) {
   const session = { send: data => res.write(data) };
   res.on('close', () => {
     const sessions = sessionCache[docID];
@@ -25,7 +25,11 @@ function stream(docID, res) {
   const sessions = sessionCache[docID];
   sessions.push(session);
   if (sessions.length > 1) {
-    sessions[0].send('{"sync":1}');
+    sessions[0].send(JSON.stringify({
+      sync: 1,
+      docID,
+      mode
+    }));
   }
   console.log(`Opened stream: ${sessions.length} streams in ${docID} / ${Object.keys(sessionCache).length} total sessions.`);
 }
@@ -107,17 +111,17 @@ const routes = {
   '/postgres': res => res.end(fileCache.postgres),
   '/pg-query': pgQuery,
   '/send': (res, docID, req) => broadcast(docID, req, res),
-  '/stream': (res, docID) => stream(docID, res)
+  '/stream': (res, docID, req, mode) => stream(docID, res, mode)
 };
 
 const server = http.createServer((req, res) => {
   const { search, pathname } = new URL(req.url, `http://${req.headers.host}`);
-  const docID = search.substring(1);
+  const [docID, mode] = search.substring(1).split('&');
   if (docID) {
     sessionCache[docID] = sessionCache[docID] || [];
   }
   if (routes[pathname]) {
-    return routes[pathname](res, docID, req);
+    return routes[pathname](res, docID, req, mode);
   }
   serveStatic(path.join('.', pathname), res);
 });

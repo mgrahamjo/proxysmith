@@ -30,20 +30,20 @@ function updateCode(lines) {
   });
 }
 
-function sendCode() {
+function sendCode(lines = window.cmView.state.doc) {
   fetch(`/send${location.search}`, {
     method: 'POST',
     body: JSON.stringify({
       sessionID,
       docID,
-      lines: window.cmView.state.doc,
+      lines,
       mode
     })
   });
 }
 
 function streamUpdates() {
-  fetch(`/stream${location.search}`).then(async res => {
+  fetch(`/stream${location.search}&${mode}`).then(async res => {
     const reader = res.body.getReader();
     let done, value, json = '';
     while (!done) {
@@ -53,13 +53,18 @@ function streamUpdates() {
         try {
           const data = JSON.parse(json);
           try {
-            if (data.sync) {
-              sendCode();
-            } else if (data.mode == mode) {
-              if (data.sessionID !== sessionID) {
-                updateCode(data.lines);
+            if (data.docID === docID) {
+              if (data.sync) {
+                const cachedLines = localStorage.getItem(data.mode + docID);
+                if (cachedLines) {
+                  sendCode(JSON.parse(cachedLines));
+                }
+              } else if (data.mode == mode) {
+                if (data.sessionID !== sessionID) {
+                  updateCode(data.lines);
+                }
+                localStorage.setItem(mode + docID, JSON.stringify(data.lines));
               }
-              localStorage.setItem(mode + docID, JSON.stringify(data.lines));
             }
           } finally {
             json = '';
