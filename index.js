@@ -6,8 +6,7 @@ const { newDb } = require('pg-mem');
 const fileCache = {
   python: fs.readFileSync('src/python.html'),
   javascript: fs.readFileSync('src/javascript.html'),
-  postgres: fs.readFileSync('src/postgres.html'),
-  help: fs.readFileSync('src/help.html')
+  postgres: fs.readFileSync('src/postgres.html')
 };
 
 const sessionCache = {};

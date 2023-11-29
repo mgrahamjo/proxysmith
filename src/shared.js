@@ -69,7 +69,10 @@ function streamUpdates() {
         }
       }
     }
-  }).finally(streamUpdates);
+  }).finally(() => {
+    console.info('Stream closed, retrying...');
+    setTimeout(streamUpdates, 1000);
+  });
 }
 
 window.init = () => {

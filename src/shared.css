@@ -81,7 +81,7 @@ a:active {
   font-size: 0;
 }
 
-@media (max-width: 460px) {
+@media (max-width: 400px) {
   .menu-toggle {
     position: fixed;
     z-index: 2;
