@@ -43,7 +43,11 @@ function sendCode(lines = window.cmView.state.doc, codeMode = mode) {
 }
 
 function streamUpdates() {
-  fetch(`/stream${location.search}&${mode}`).then(async res => {
+  const controller = new AbortController();
+  window.onbeforeunload = () => controller.abort();
+  fetch(`/stream${location.search}&${mode}`, {
+    signal: controller.signal
+  }).then(async res => {
     const reader = res.body.getReader();
     let done, value, json = '';
     while (!done) {

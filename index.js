@@ -13,7 +13,7 @@ const sessionCache = {};
 
 function stream(docID, res, mode) {
   const session = { send: data => res.write(data) };
-  res.on('close', () => {
+  function cleanup() {
     const sessions = sessionCache[docID];
     if (sessions.length === 1) {
       delete sessionCache[docID];
@@ -21,7 +21,8 @@ function stream(docID, res, mode) {
       sessions.splice(sessions.indexOf(session), 1);
     }
     console.log(`Closed stream: ${sessions.length} streams in ${docID} / ${Object.keys(sessionCache).length} total sessions.`);
-  });
+  }
+  res.on('close', cleanup);
   const sessions = sessionCache[docID];
   sessions.push(session);
   if (sessions.length > 1) {
