@@ -25,9 +25,8 @@
   </div>
   <div id="code-editor"></div>
   <div class="terminal"></div>
-  <iframe srcdoc="<!doctype html><meta charset=utf-8><title></title>" style="display:none;"></iframe>
   <script>
-    const iframeWindow = document.querySelector('iframe[srcdoc]').contentWindow;
+    const mockDoc = new Document();
     const log = (...args) => {
       console.log(...args);
       const div = document.createElement('div');
@@ -41,23 +40,32 @@
       div.classList.add('error');
       $terminal.appendChild(div);
     };
-    iframeWindow.console = {
-      ...console,
-      log,
-      info: log,
-      debug: log,
-      warn: log,
-      error: logErr
+    const context = {
+      console: {
+        ...console,
+        log,
+        info: log,
+        debug: log,
+        warn: log,
+        error: logErr
+      },
+      document: mockDoc,
+      window: null,
+      parent: null,
+      self: mockDoc,
+      globalThis: mockDoc
     };
-    iframeWindow.parent = iframeWindow;
     const $terminal = document.querySelector('.terminal');
     const AsyncFunction = async function () {}.constructor;
     async function _run() {
       const script = window.cmView.state.doc.toString();
       $terminal.innerHTML = '';
       try {
-        const run = new AsyncFunction(...Object.keys(iframeWindow), script).bind(iframeWindow);
-        const result = await run(...Object.values(iframeWindow));
+        const run = new AsyncFunction(...Object.keys(context), script).bind(context);
+        const result = await run(...Object.values(context));
+        if (result !== undefined) {
+          log(result);
+        }
       } catch (error) {
         logErr(error);
       }
