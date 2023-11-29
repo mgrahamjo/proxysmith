@@ -30,14 +30,14 @@ function updateCode(lines) {
   });
 }
 
-function sendCode(lines = window.cmView.state.doc) {
+function sendCode(lines = window.cmView.state.doc, codeMode = mode) {
   fetch(`/send${location.search}`, {
     method: 'POST',
     body: JSON.stringify({
       sessionID,
       docID,
       lines,
-      mode
+      mode: codeMode
     })
   });
 }
@@ -57,7 +57,7 @@ function streamUpdates() {
               if (data.sync) {
                 const cachedLines = localStorage.getItem(data.mode + docID);
                 if (cachedLines) {
-                  sendCode(JSON.parse(cachedLines));
+                  sendCode(JSON.parse(cachedLines), data.mode);
                 }
               } else if (data.mode == mode) {
                 if (data.sessionID !== sessionID) {
